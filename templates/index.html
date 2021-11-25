@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Review Classifier Web App</title>
+    <link href="path/css-circular-prog-bar.css" rel="stylesheet">
+
+    <style>
+        *{
+            margin: 0; padding:0;
+            font-family: sans-serif;
+        }
+        .banner{
+            width: 100%;
+            height: 100vh;
+            background: #333;
+            background-image: linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url('/static/trans-bg.png');
+            background-size: cover;
+            background-position: center;
+        } 
+        .navbar{
+            width: 90%;
+            margin: auto;
+            padding: 15px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .logo{
+            width: 120px;
+            cursor: pointer;
+        }
+        .navbar ul li{
+            list-style: none;
+            display: inline-block;
+            margin: 0 20px;
+            position: relative;
+        }
+        .navbar ul li a{
+            text-decoration: none;
+            color: #fff;
+            text-transform: uppercase;            
+        }
+        .navbar ul li::after{
+            content: '';
+            height: 3px;
+            width: 0;
+            background: #DDBB71;
+            position: absolute;
+            left: 0;
+            bottom: -7px;
+            transition: 0.5s;
+        }
+        .navbar ul li:hover::after{
+            width: 100%
+        }
+        .content{
+            width: 100%;
+            position: absolute;
+            top: 25%;
+            transform: translateY(-50%);
+            text-align: center;
+            color: #fff;
+        }
+        .content h1{
+            font-size: 60px;
+            margin-top: 50px;
+        }
+        .content p{
+            margin: 20px auto;
+            font-weight:100;
+            line-height: 25px;
+        }
+        .container {
+            position: absolute;
+            top: 10%;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .review {
+            width: 720px;
+            height: 300px;
+            box-shadow: 2px 4px 10px rgba(0, 0, 0, .2);
+            border-radius: 60px;
+            overflow: hidden;
+        }
+        .review-form {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        .review-form .add-review{
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            outline: none;
+            padding: 20px 40px 10px 40px;
+        }
+        .review-form .submit-review {
+            position: absolute;
+            top: 100;
+            right: 0;
+            height: calc(100% - 250px);
+            width: 170px;
+            border: none;
+            border-radius: 60px;
+            outline: none;
+            margin: 240px 20px 8px 160px;
+            padding: 0 20px;
+            cursor: pointer;
+            background: #DDBB71;
+            color: #FFFFFF;
+            transition: width .35s ease-in-out, background .35s ease-in-out;
+        }
+        .review-form.done .submit-review {
+            width: calc(100% - 40px);
+            background: #C0E02E;
+        }
+        .review-form .submit-review .before-submit,
+        .review-form .submit-review .after-submit {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            line-height: 38px;
+            transition: visibility .35s ease-in-out,
+                opacity .35s ease-in-out;
+        }
+        .review-form.done .submit-review .before-submit,
+        .review-form:not(.done) .submit-review .after-submit {
+            visibility: hidden;
+            opacity: 0;
+        }
+        .review-form .submit-review .after-submit {
+             transition-delay: .35s;
+        }   
+
+        .review-form:not(.done) .submit-review.before-submit,
+        .review-form.done .submit-review .after-submit {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .summary {
+            position: absolute;
+            top: 85%;
+            left: 0;
+            width: 100%;
+            height: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sum {
+            color: white;
+            font-size: 20px;
+
+        }
+        
+        .clr {
+            position: absolute;
+            bottom: 5%;
+            left: 0;
+            width: 100%;
+            height: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .clr a{
+            text-decoration: none;
+            color: #DDBB71;
+            text-transform: uppercase;            
+        }
+        .clr a::after{
+            content: '';
+            height: 2px;
+            width: 0;
+            background: #DDBB71;
+            position: absolute;
+            left: 0;
+            bottom: -10px;
+            transition: 0.5s;
+        }
+        .clr a:hover::after{
+            width: 100%
+        }
+
+        .result {
+            width: 139px;
+            height: 300px;
+            margin: 23px;
+            box-shadow: 2px 4px 10px rgba(0, 0, 0, .2);
+            border-radius: 60px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .pos-circle {
+            font-size: 20px;
+            margin: 20px;
+            position: relative; /* so that children can be absolutely positioned */
+            padding: 0;
+            width: 5em;
+            height: 5em;
+            background-color: #60db6e; 
+            border-radius: 50%;
+            line-height: 5em;
+            display:inline-block;
+        }
+        .pos-circle:after{
+            border: none;
+            position: absolute;
+            top: 0.35em;
+            left: 0.35em;
+            text-align: center;
+            display: block;
+            border-radius: 50%;
+            width: 4.3em;
+            height: 4.3em;
+            background-color: rgb(255, 255, 255);
+            content: " ";
+        }
+        /* Text inside the control */
+        .pos-circle span {
+            position: absolute;
+            line-height: 5em;
+            width: 5em;
+            text-align: center;
+            display: block;
+            color: #53777A;
+            z-index: 2;
+        }
+        .neg-circle {
+            font-size: 20px;
+            margin: 20px;
+            position: relative; /* so that children can be absolutely positioned */
+            padding: 0;
+            width: 5em;
+            height: 5em;
+            background-color: #f38b8b; 
+            border-radius: 50%;
+            line-height: 5em;
+            display:inline-block;
+        }
+        .neg-circle:after{
+            border: none;
+            position: absolute;
+            top: 0.35em;
+            left: 0.35em;
+            text-align: center;
+            display: block;
+            border-radius: 50%;
+            width: 4.3em;
+            height: 4.3em;
+            background-color: white;
+            content: " ";
+        }
+        /* Text inside the control */
+        .neg-circle span {
+            position: absolute;
+            line-height: 5em;
+            width: 5em;
+            text-align: center;
+            display: block;
+            color: #a32f2f;
+            z-index: 2;
+        }
+        .left-half-clipper { 
+        /* a round circle */
+            border-radius: 75%;
+            width: 5em;
+            height: 5em;
+            position: absolute; /* needed for clipping */
+            clip: rect(0, 5em, 5em, 2.5em); /* clips the whole left half*/ 
+            }
+
+        #section{
+            width: 100%;
+            height:50vh;
+        }    
+        .cont{
+            top: 100%;
+            width: 90%;
+            height: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }    
+
+        .fixed-footer{
+            bottom: 0;
+            width: 100%;
+            position: relative;        
+            background: #333;
+            padding: 10px 0;
+            color: #fff;
+        }
+        .footer-container{
+            width: 80%;
+            margin: 0 auto; /* Center the DIV horizontally */
+        }
+
+
+    </style>
+</head>   
+
+<body>
+    <div class="banner">
+        <div class="navbar">
+            <img src="{{url_for('static', filename='trans-logo.png')}}"  class="logo">
+            <ul>
+                <li><a href="#section">LEARN MORE</a></li>
+                <li><a href="#section">CODES</a></li>
+            </ul>
+        </div>
+        <div class="content">
+            <h1>HOW WAS THE MOVIE?</h1>
+            <p> Type or paste your movie review and the app will predict the rate of your movie review using Sentiment Analysis.</p>
+        </div>
+    </div>
+    <div class="container">
+        <div class="review">
+            <form class="review-form" action="{{url_for('predict')}}" method="POST">
+                <textarea class="add-review"
+                    id="snippet"
+                    rows="18"
+                    required
+                    name="phrase"
+                    placeholder="Start by writing or pasting something here and then press the Predict button."    
+                    ></textarea>
+
+                <div class="predict-btn">
+                    <input type="submit" class="submit-review" value="PREDICT">
+                    <span class="before-submit">PREDICT</span>
+                    <span class="after-submit">Predicting results...</span>
+                </div>
+            </form>
+        </div> 
+
+        <div class="result">
+            <div class="pos-circle">
+                <span>{{pos_average}}%</span>
+                <div class="left-half-clipper">
+                </div>
+            </div>
+    
+            <div class="neg-circle">
+                <span>{{neg_average}}%</span>
+                <div class="left-half-clipper">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="summary" style="text-align: center">
+        {% if (isSubmit==True): %}
+            <div class="sum" role="alert">
+              The review is mostly — {{phrase_output}}
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="clr" style="text-align: center">
+        <a href="/">Predict Another ↺</a>      
+    </div>
+    
+    <section id="section">
+        <div class="cont">
+            <div class="info">
+                <h1>Learn more</h1>
+                <p>
+                    Through Long Short-Term memory (LSTM) and Recurrent Neural Network (RNN) convolutional neural network, <br>
+                    a prediction model for classifying movie reviews is trained using the IMDB dataset with balance number of samples both training
+                    and testing. <br>Built with an accuracy of ~84%, the model is applied to this web app to predict both the positivity and negativity percentage rate of the user's inputted text.
+                </p>
+                <p><br><br></p>
+                <h1>Codes & Github Repository</h1>
+                <p>
+                    The files I used to create this app is linked below:<br>
+                    <b>✔️ .ipynb file:</b> <a href="https://drive.google.com/file/d/1Jubvl2sg6_PMpuZ6t0BhhOKLD7pkfL5D/view?usp=sharing">.ipynb file</a> <br>
+                    <b>✔️ Github Repository:</b> LINK HERE <br> 
+                </p>
+
+            </div>
+        </div>
+    </section>
+
+
+    <div class="fixed-footer">
+        <div class="footer-container" style="text-align: center">Copyright &copy; 2021 Hanna Mae Mangampo BCS42</div>        
+    </div>
+
+    <script type="text/javascript">
+        document.querySelector('.submit-review').addEventListener('mousedown', (e) => {e.preventDefault();
+        document.querySelector('.review-form').classList.add('done');
+        });
+    </script>
+
+
+</body>
+</html>    
